@@ -318,9 +318,41 @@ def webhook():
         return "OK", 200
     
     if request.method == 'POST':
-        datos = request.json
-        print("📩 Mensaje recibido:", datos)
         
+        datos = request.json
+print("📩 Mensaje recibido (RAW):", datos)
+
+# Extraer mensaje y número según la estructura de Wappfly
+mensaje = None
+numero = None
+
+# Intenta extraer del formato común de Wappfly
+if 'messages' in datos and len(datos['messages']) > 0:
+    msg_data = datos['messages'][0]
+    mensaje = msg_data.get('messageBody')
+    if not mensaje:
+        mensaje = msg_data.get('message', {}).get('conversation')
+    # Extraer número del remitente
+    if 'key' in msg_data:
+        numero = msg_data['key'].get('remoteId')
+        if not numero:
+            numero = msg_data['key'].get('senderPn')
+    if not numero:
+        numero = msg_data.get('senderPn')
+else:
+    # Formato alternativo (si Wappfly envía directo)
+    mensaje = datos.get('text')
+    numero = datos.get('chatId')
+
+# Si aún no tenemos número, usar el remitente del evento
+if not numero:
+    numero = datos.get('participant')
+
+# Si no hay mensaje, intentar con 'messageBody'
+if not mensaje:
+    mensaje = datos.get('messageBody')
+
+print(f"📩 Mensaje extraído: '{mensaje}' de {numero}")
         # Manejar interacciones de botones
         if datos.get('type') == 'button':
             button_id = datos.get('buttonId')
