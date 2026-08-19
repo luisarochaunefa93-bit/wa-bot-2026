@@ -4,8 +4,8 @@ import requests
 
 app = Flask(__name__)
 
-TOKEN = "fe5e52be0ae10188922362f"
-SESSION = "mi-sesion"
+TOKEN = os.environ.get("WAPPFLY_TOKEN", "fe5e52be0ae10188922362f")
+SESSION = os.environ.get("SESSION_NAME", "mi-sesion")
 
 def enviar_mensaje(numero, texto):
     url = "https://api.wappfly.com/api/sendText"
