@@ -13,12 +13,12 @@ app = Flask(__name__)
 # =================== CONFIGURACIÓN ===================
 TOKEN = os.environ.get("WAPPFLY_TOKEN", "fe5e52be0ae10188922362f")
 SESSION = os.environ.get("SESSION_NAME", "mi-sesion")
-ADMIN_NUMBER = "584242670079@c.us"
-GROUP_ID = "584242670079@c.us"
-SIMULATION_MODE = True
-RENTABILIDAD_MINIMA = 30
-APUESTA_MINIMA = 9000
-SALDO_INICIAL = 17000
+ADMIN_NUMBER = "584242670079@c.us"  # Tu número
+GROUP_ID = "584242670079@c.us"  # Grupo o tu número para pruebas
+SIMULATION_MODE = True  # True = simulación (no gasta crédito)
+RENTABILIDAD_MINIMA = 30  # 30% mínimo
+APUESTA_MINIMA = 9000  # 9.000 Bs.
+SALDO_INICIAL = 17000  # 17.000 Bs.
 
 # =================== BASE DE DATOS ===================
 DB_NAME = "apuestas.db"
@@ -160,6 +160,7 @@ def calcular_apuesta(cuota_a, cuota_b, saldo):
     if total_apostado < APUESTA_MINIMA:
         return None, None, None, None, None, None, f"Apuesta insuficiente ({formatear_numero(total_apostado)} Bs.). Mínimo: {formatear_numero(APUESTA_MINIMA)} Bs."
     
+    # Calcular ganancias (ejemplo: 70% de ganancia sobre el saldo)
     ganancia_total = saldo * 1.7
     ganancia_bruta = ganancia_total - saldo
     comision = ganancia_bruta * 0.05
@@ -177,7 +178,10 @@ ultima_oportunidad = {}
 def procesar_arbitraje(mensaje_usuario, remitente):
     global ultima_oportunidad
     try:
+        # Llamar a DeepSeek (usaremos un JSON fijo para pruebas)
         import json
+        # Simulamos la respuesta de DeepSeek para que funcione sin API key
+        # En producción, descomenta la llamada real
         datos = json.loads('{"caballo_a": "5", "cuota_a": 3.5, "caballo_b": "8", "cuota_b": 4.2}')
         
         caballo_a = str(datos["caballo_a"])
@@ -232,6 +236,7 @@ def procesar_arbitraje(mensaje_usuario, remitente):
 
 def procesar_resultado_carrera(mensaje):
     try:
+        # Simulamos extracción de ganador
         import json
         datos = json.loads('{"ganador": "5"}')
         ganador = str(datos["ganador"])
@@ -316,6 +321,7 @@ def webhook():
         datos = request.json
         print("📩 Mensaje recibido:", datos)
         
+        # Manejar interacciones de botones
         if datos.get('type') == 'button':
             button_id = datos.get('buttonId')
             if button_id == "aprobar":
@@ -349,17 +355,20 @@ def webhook():
                 ultima_oportunidad = {}
             return jsonify({"status": "ok"}), 200
         
+        # Procesar mensaje normal
         mensaje = datos.get('text', '')
         numero = datos.get('chatId', '')
         
         if not mensaje or not numero:
             return jsonify({"status": "ok"}), 200
         
+        # Comandos
         respuesta_comando = procesar_comando(mensaje)
         if respuesta_comando:
             enviar_mensaje(numero, respuesta_comando)
             return jsonify({"status": "ok"}), 200
         
+        # Detectar cuotas o resultados
         palabras_cuotas = ["paga", "cuota", "cotiza", "caballo", "pago"]
         palabras_resultado = ["ganó", "resultado", "ganador", "winner"]
         
