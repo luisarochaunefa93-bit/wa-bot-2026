@@ -8,7 +8,7 @@ TOKEN = "fe5e52be0ae10188922362f"
 SESSION = "mi-sesion"
 
 def enviar(numero, texto):
-    url = "https://api.wappfly.com/api/sendText"
+    url =url = "https://api.wappfly.com/api/sendText"
     headers = {"apikey": TOKEN, "Content-Type": "application/json"}
     data = {"session": SESSION, "chatId": numero, "text": texto}
     try:
