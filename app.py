@@ -23,7 +23,7 @@ def webhook():
         return "OK", 200
     if request.method == 'POST':
         datos = request.json
-        print("📩 Mensaje:", datos)
+        print("📩 Mensaje recibido:", datos)
         msg = datos.get('text', '')
         num = datos.get('chatId', '')
         if msg == "!estado":
